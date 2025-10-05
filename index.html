@@ -298,6 +298,8 @@
         let apiKey = localStorage.getItem('openai_api_key') || '';
         let transcriptData = [];
         let chatHistory = [];
+        let autoRestartInterval;
+        let currentStream;
 
         // Carica API key salvata
         if (apiKey) {
@@ -382,41 +384,95 @@
                     }
                 };
                 
-                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
 
-                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder = new MediaRecorder(currentStream);
                 audioChunks = [];
 
-                mediaRecorder.ondataavailable = async (event) => {
+                mediaRecorder.ondataavailable = (event) => {
                     if (event.data.size > 0) {
-                        // Controlla dimensione minima
-                        if (event.data.size < 30000) {
-                            console.log('Chunk troppo piccolo, ignorato:', event.data.size, 'bytes');
-                            return;
-                        }
-                        // Ogni 30 secondi arriva un chunk, lo trascriviamo subito
-                        const audioBlob = new Blob([event.data], { type: 'audio/webm' });
-                        await transcribeAudio(audioBlob);
+                        audioChunks.push(event.data);
                     }
                 };
 
-                // Emetti un chunk ogni 30 secondi (30000ms)
-                mediaRecorder.start(30000);
-                isRecording = true;
+                mediaRecorder.onstop = async () => {
+                    if (audioChunks.length > 0) {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        
+                        // Controlla dimensione minima
+                        if (audioBlob.size > 30000) {
+                            await transcribeAudio(audioBlob);
+                        } else {
+                            console.log('Chunk troppo piccolo, ignorato');
+                        }
+                        
+                        audioChunks = [];
+                    }
+                    
+                    // Se siamo ancora in registrazione, riavvia automaticamente
+                    if (isRecording) {
+                        setTimeout(() => {
+                            startRecording();
+                        }, 100);
+                    }
+                };
+
+                mediaRecorder.start();
                 
-                document.getElementById('recBtn').textContent = '⏸ PAUSA';
-                document.getElementById('recBtn').classList.add('recording');
+                // Auto-restart ogni 30 secondi per creare file webm validi
+                if (isRecording) {
+                    autoRestartInterval = setTimeout(() => {
+                        if (mediaRecorder && mediaRecorder.state === 'recording') {
+                            mediaRecorder.stop();
+                        }
+                    }, 30000);
+                }
 
             } catch (error) {
+                console.error('Errore nella registrazione:', error);
                 alert('Errore nell\'accesso al microfono: ' + error.message);
+                isRecording = false;
+                document.getElementById('recBtn').textContent = '● REC';
+                document.getElementById('recBtn').classList.remove('recording');
+            }
+        }
+
+        async function toggleRecording() {
+            if (!apiKey) {
+                alert('Configura prima la tua API Key OpenAI!');
+                return;
+            }
+
+            if (isRecording) {
+                stopRecording();
+            } else {
+                isRecording = true;
+                document.getElementById('recBtn').textContent = '⏸ PAUSA';
+                document.getElementById('recBtn').classList.add('recording');
+                await startRecording();
             }
         }
 
         function stopRecording() {
             if (mediaRecorder && isRecording) {
-                mediaRecorder.stop();
-                mediaRecorder.stream.getTracks().forEach(track => track.stop());
                 isRecording = false;
+                
+                // Cancella timer auto-restart
+                if (autoRestartInterval) {
+                    clearTimeout(autoRestartInterval);
+                    autoRestartInterval = null;
+                }
+                
+                // Ferma registrazione
+                if (mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.stop();
+                }
+                
+                // Ferma stream
+                if (currentStream) {
+                    currentStream.getTracks().forEach(track => track.stop());
+                    currentStream = null;
+                }
                 
                 document.getElementById('recBtn').textContent = '● REC';
                 document.getElementById('recBtn').classList.remove('recording');
