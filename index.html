@@ -464,9 +464,21 @@
 
             } catch (error) {
                 loadingMsg.remove();
+                
+                // Mostra errore dettagliato
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'error';
-                errorDiv.textContent = 'Errore: ' + error.message;
+                
+                let errorMessage = 'Errore nella trascrizione:\n';
+                errorMessage += error.message + '\n';
+                
+                // Se c'è una risposta dall'API, mostrala
+                if (error.response) {
+                    errorMessage += 'Dettagli: ' + JSON.stringify(error.response);
+                }
+                
+                errorDiv.textContent = errorMessage;
+                console.error('Errore completo:', error);
                 transcriptArea.appendChild(errorDiv);
             }
         }
