@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SABAOTH Stories Maker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -11,17 +14,41 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --primary-color: #09af00;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --text-primary: #1D1B20;
+            --text-secondary: #666;
+            --border-color: #E7E0EC;
+            --error-bg: #f8d7da;
+            --error-text: #721c24;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --border-color: #3d3d3d;
+            --error-bg: #4a2020;
+            --error-text: #ff6b6b;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f5f5;
-            color: #1D1B20;
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .header {
-            background: white;
+            background: var(--bg-primary);
             padding: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             text-align: center;
+            position: relative;
+            transition: background-color 0.3s;
         }
 
         .logo {
@@ -29,35 +56,72 @@
             height: auto;
         }
 
-        .api-config {
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            color: #333;
+            border: 2px solid #333;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        [data-theme="dark"] .theme-toggle {
+            color: white;
+            border-color: white;
+        }
+
+        .theme-toggle:hover {
+            background: #333;
+            color: white;
+        }
+
+        [data-theme="dark"] .theme-toggle:hover {
             background: white;
+            color: #333;
+        }
+
+        .api-config {
+            background: var(--bg-primary);
             padding: 20px;
             margin: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: background-color 0.3s;
         }
 
-        .api-config input {
+        .api-config input, .api-config select {
             width: 70%;
             padding: 12px;
-            border: 2px solid #E7E0EC;
+            border: 2px solid var(--border-color);
             border-radius: 4px;
             font-size: 14px;
             margin-right: 10px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Montserrat', sans-serif;
         }
 
         .api-config button {
             padding: 12px 24px;
-            background: #6750A4;
+            background: var(--primary-color);
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
+            text-transform: capitalize;
         }
 
         .api-config button:hover {
-            background: #5a3f96;
+            opacity: 0.9;
         }
 
         .status {
@@ -66,6 +130,7 @@
             padding: 4px 12px;
             border-radius: 12px;
             font-size: 12px;
+            font-weight: 600;
         }
 
         .status.connected {
@@ -74,8 +139,8 @@
         }
 
         .status.disconnected {
-            background: #f8d7da;
-            color: #721c24;
+            background: var(--error-bg);
+            color: var(--error-text);
         }
 
         .container {
@@ -88,16 +153,22 @@
 
         .panel {
             flex: 1;
-            background: white;
+            background: var(--bg-primary);
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: background-color 0.3s;
         }
 
         .panel h2 {
             margin-bottom: 20px;
-            color: #6750A4;
+            color: #333;
             font-size: 20px;
+            font-weight: 700;
+        }
+
+        [data-theme="dark"] .panel h2 {
+            color: #e0e0e0;
         }
 
         .controls {
@@ -113,7 +184,9 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 700;
+            font-family: 'Montserrat', sans-serif;
+            text-transform: capitalize;
             transition: all 0.3s;
         }
 
@@ -145,18 +218,38 @@
             background: #5a6268;
         }
 
-        .btn-save, .btn-clear {
-            background: #6750A4;
+        .btn-save, .btn-insert {
+            background: var(--primary-color);
             color: white;
         }
 
-        .btn-save:hover, .btn-clear:hover {
-            background: #5a3f96;
+        .btn-save:hover, .btn-insert:hover {
+            opacity: 0.9;
         }
 
-        .transcript-area {
-            background: #f8f9fa;
-            border: 1px solid #E7E0EC;
+        .btn-clear {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-clear:hover {
+            background: #5a6268;
+        }
+
+        .btn-outlined {
+            background: transparent;
+            color: #6c757d;
+            border: 2px solid #6c757d;
+        }
+
+        .btn-outlined:hover {
+            background: #6c757d;
+            color: white;
+        }
+
+        .transcript-area, .chat-area {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
             border-radius: 4px;
             padding: 15px;
             min-height: 400px;
@@ -164,30 +257,25 @@
             overflow-y: auto;
             font-size: 14px;
             line-height: 1.6;
+            transition: background-color 0.3s, border-color 0.3s;
         }
 
         .transcript-item {
             margin-bottom: 12px;
             padding: 8px;
-            background: white;
+            background: var(--bg-primary);
             border-radius: 4px;
+            transition: background-color 0.3s;
         }
 
         .timestamp {
-            color: #6750A4;
-            font-weight: 600;
+            color: var(--primary-color);
+            font-weight: 700;
             font-size: 12px;
             margin-right: 8px;
         }
 
         .chat-area {
-            background: #f8f9fa;
-            border: 1px solid #E7E0EC;
-            border-radius: 4px;
-            padding: 15px;
-            min-height: 400px;
-            max-height: 500px;
-            overflow-y: auto;
             margin-bottom: 15px;
         }
 
@@ -199,64 +287,78 @@
         }
 
         .message.user {
-            background: #E7E0EC;
+            background: var(--border-color);
             margin-left: auto;
         }
 
         .message.assistant {
-            background: white;
-            border: 1px solid #E7E0EC;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
         }
 
         .chat-input {
             display: flex;
             gap: 10px;
+            margin-bottom: 10px;
         }
 
         .chat-input textarea {
             flex: 1;
             padding: 12px;
-            border: 2px solid #E7E0EC;
+            border: 2px solid var(--border-color);
             border-radius: 4px;
             resize: vertical;
-            font-family: inherit;
+            font-family: 'Montserrat', sans-serif;
             font-size: 14px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
         }
 
         .loading {
             text-align: center;
-            color: #6750A4;
+            color: var(--primary-color);
             padding: 10px;
             font-style: italic;
         }
 
         .error {
-            background: #f8d7da;
-            color: #721c24;
+            background: var(--error-bg);
+            color: var(--error-text);
             padding: 10px;
             border-radius: 4px;
             margin: 10px 0;
+            white-space: pre-wrap;
         }
 
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
             }
+            
+            .theme-toggle {
+                position: relative;
+                top: 0;
+                right: 0;
+                margin: 10px auto;
+                display: block;
+                width: fit-content;
+            }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjgwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjx0ZXh0IHg9IjIwMCIgeT0iNDAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIzNiIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IiMzMzMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPlNBQkFPVEg8L3RleHQ+PHRleHQgeD0iMjAwIiB5PSI2NSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSIjNjY2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5TVE9SSUVTIE1BS0VSPC90ZXh0Pjwvc3ZnPg==" alt="SABAOTH Stories Maker" class="logo">
+        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Dark mode ☾☼</button>
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" alt="SABAOTH Stories Maker" class="logo" id="logo">
     </div>
 
     <div class="api-config">
         <input type="password" id="apiKey" placeholder="Inserisci la tua OpenAI API Key">
-        <button onclick="saveApiKey()">Salva API Key</button>
+        <button onclick="saveApiKey()">Salva api key</button>
         <span id="apiStatus" class="status disconnected">Non configurato</span>
         <br><br>
         <label for="audioSource">Seleziona microfono: </label>
-        <select id="audioSource" style="padding: 8px; border-radius: 4px; border: 2px solid #E7E0EC;">
+        <select id="audioSource" style="padding: 8px; border-radius: 4px; border: 2px solid var(--border-color); width: auto;">
             <option value="">Caricamento microfoni...</option>
         </select>
     </div>
@@ -265,18 +367,18 @@
         <div class="panel">
             <h2>📝 Trascrizione</h2>
             <div class="controls">
-                <button class="btn btn-rec" id="recBtn" onclick="toggleRecording()">● REC</button>
-                <button class="btn btn-stop" onclick="stopRecording()">■ STOP</button>
-                <button class="btn btn-save" onclick="saveTranscript()">💾 SALVA</button>
-                <button class="btn btn-clear" onclick="clearTranscript()">🗑️ PULISCI</button>
+                <button class="btn btn-rec" id="recBtn" onclick="toggleRecording()">● Rec</button>
+                <button class="btn btn-stop" onclick="stopRecording()">■ Stop</button>
+                <button class="btn btn-save" onclick="saveTranscript()">💾 Salva</button>
+                <button class="btn btn-clear" onclick="clearTranscript()">🗑️ Pulisci</button>
             </div>
             <div id="transcriptArea" class="transcript-area">
-                <p style="color: #999; text-align: center;">Premi REC per iniziare la registrazione...</p>
+                <p style="color: #999; text-align: center;">Premi Rec per iniziare la registrazione...</p>
             </div>
         </div>
 
         <div class="panel">
-            <h2>💬 Chat GPT</h2>
+            <h2>💬 ChatGPT</h2>
             <div id="chatArea" class="chat-area">
                 <p style="color: #999; text-align: center;">Inizia una conversazione...</p>
             </div>
@@ -284,9 +386,10 @@
                 <textarea id="chatInput" placeholder="Scrivi un messaggio o inserisci il testo trascritto..." rows="3"></textarea>
                 <button class="btn btn-save" onclick="sendMessage()">Invia</button>
             </div>
-            <div style="margin-top: 10px;">
-                <button class="btn btn-clear" onclick="insertTranscript()">📋 Inserisci Trascrizione</button>
-                <button class="btn btn-clear" onclick="clearChat()">🗑️ Pulisci Chat</button>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn btn-outlined" onclick="insertTranscript()">📋 Inserisci trascrizione</button>
+                <button class="btn btn-outlined" onclick="insertPrompt()">📄 Inserisci prompt</button>
+                <button class="btn btn-outlined" onclick="clearChat()">🗑️ Pulisci chat</button>
             </div>
         </div>
     </div>
@@ -300,6 +403,81 @@
         let chatHistory = [];
         let autoRestartInterval;
         let currentStream;
+        let recordingStartTime = null;
+
+        const defaultPrompt = `PROMPT PER ESTRAZIONE CONTENUTI DA PREDICAZIONI
+
+CONTESTO
+Sei un esperto di content creation per social media religiosi. Il tuo compito è analizzare trascrizioni di predicazioni/sermoni e estrarre contenuti ottimizzati per Instagram Stories.
+
+OBIETTIVO
+Partendo dalla trascrizione di una predicazione, devi creare contenuti per Instagram Stories.
+
+FRASI PER INSTAGRAM STORIES
+* **Lunghezza**: Frasi brevi e d'impatto (massimo 1-2 righe)
+* **Tipologia**: Frasi motivazionali, di sfida, bibliche/spirituali
+* **Correzioni**: Correggi eventuali errori grammaticali mantenendo il tono originale
+* **Numero**: 15-20 frasi per trascrizione
+* **Organizzazione**: Raggruppa per categorie tematiche
+
+CRITERI DI SELEZIONE
+* Frasi che generano riflessione
+* Messaggi universali applicabili a tutti
+* Citazioni bibliche parafrasate
+* Chiamate all'azione spirituali
+* Affermazioni motivazionali potenti
+
+TONO E STILE
+* Mantieni ESATTAMENTE lo stesso tono del predicatore
+* Conserva le espressioni caratteristiche
+* Non modificare il messaggio teologico
+* Rispetta il linguaggio colloquiale se presente
+* Preserva l'autenticità emotiva
+
+FORMATO OUTPUT
+Presenta i risultati in una sezione unica:
+1. **Sezione A**: Lista delle frasi per Stories organizzate per categoria
+
+ESEMPIO DI RICHIESTA
+"Analizza questa trascrizione di predicazione ed estrai frasi per Stories seguendo i criteri sopra indicati."`;
+
+        // Tema
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateLogo(newTheme);
+            updateThemeButtonText(newTheme);
+        }
+
+        function updateThemeButtonText(theme) {
+            const button = document.getElementById('themeToggle');
+            if (theme === 'dark') {
+                button.textContent = 'Light mode ☾☼';
+            } else {
+                button.textContent = 'Dark mode ☾☼';
+            }
+        }
+
+        function updateLogo(theme) {
+            const logo = document.getElementById('logo');
+            // Per ora uso solo il logo nero, quando caricherai quello bianco lo aggiornerò
+            if (theme === 'dark') {
+                logo.src = 'logo-white.png'; // Sarà caricato dopo
+            } else {
+                logo.src = 'logo-black.png'; // Quello che hai caricato
+            }
+        }
+
+        // Carica tema salvato
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        
+        // Inizializza testo bottone tema
+        window.addEventListener('load', () => {
+            updateThemeButtonText(savedTheme);
+        });
 
         // Carica API key salvata
         if (apiKey) {
@@ -311,7 +489,6 @@
         // Carica lista microfoni disponibili
         async function loadAudioDevices() {
             try {
-                // Richiedi permesso microfono prima
                 await navigator.mediaDevices.getUserMedia({ audio: true });
                 
                 const devices = await navigator.mediaDevices.enumerateDevices();
@@ -327,12 +504,10 @@
                     select.appendChild(option);
                 });
                 
-                // Salva il dispositivo selezionato
                 select.onchange = () => {
                     localStorage.setItem('selected_audio_device', select.value);
                 };
                 
-                // Ripristina selezione salvata
                 const savedDevice = localStorage.getItem('selected_audio_device');
                 if (savedDevice) {
                     select.value = savedDevice;
@@ -343,7 +518,6 @@
             }
         }
 
-        // Carica dispositivi all'avvio
         window.addEventListener('load', loadAudioDevices);
 
         function saveApiKey() {
@@ -358,17 +532,11 @@
             }
         }
 
-        async function toggleRecording() {
-            if (!apiKey) {
-                alert('Configura prima la tua API Key OpenAI!');
-                return;
-            }
-
-            if (isRecording) {
-                stopRecording();
-            } else {
-                startRecording();
-            }
+        function formatElapsedTime(milliseconds) {
+            const totalSeconds = Math.floor(milliseconds / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
 
         async function startRecording() {
@@ -386,6 +554,10 @@
                 
                 currentStream = await navigator.mediaDevices.getUserMedia(constraints);
 
+                if (!recordingStartTime) {
+                    recordingStartTime = Date.now();
+                }
+
                 mediaRecorder = new MediaRecorder(currentStream);
                 audioChunks = [];
 
@@ -399,7 +571,6 @@
                     if (audioChunks.length > 0) {
                         const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
                         
-                        // Controlla dimensione minima
                         if (audioBlob.size > 30000) {
                             await transcribeAudio(audioBlob);
                         } else {
@@ -409,7 +580,6 @@
                         audioChunks = [];
                     }
                     
-                    // Se siamo ancora in registrazione, riavvia automaticamente
                     if (isRecording) {
                         setTimeout(() => {
                             startRecording();
@@ -419,7 +589,6 @@
 
                 mediaRecorder.start();
                 
-                // Auto-restart ogni 30 secondi per creare file webm validi
                 if (isRecording) {
                     autoRestartInterval = setTimeout(() => {
                         if (mediaRecorder && mediaRecorder.state === 'recording') {
@@ -432,7 +601,7 @@
                 console.error('Errore nella registrazione:', error);
                 alert('Errore nell\'accesso al microfono: ' + error.message);
                 isRecording = false;
-                document.getElementById('recBtn').textContent = '● REC';
+                document.getElementById('recBtn').textContent = '● Rec';
                 document.getElementById('recBtn').classList.remove('recording');
             }
         }
@@ -447,7 +616,8 @@
                 stopRecording();
             } else {
                 isRecording = true;
-                document.getElementById('recBtn').textContent = '⏸ PAUSA';
+                recordingStartTime = Date.now();
+                document.getElementById('recBtn').textContent = '⏸ Pausa';
                 document.getElementById('recBtn').classList.add('recording');
                 await startRecording();
             }
@@ -456,25 +626,23 @@
         function stopRecording() {
             if (mediaRecorder && isRecording) {
                 isRecording = false;
+                recordingStartTime = null;
                 
-                // Cancella timer auto-restart
                 if (autoRestartInterval) {
                     clearTimeout(autoRestartInterval);
                     autoRestartInterval = null;
                 }
                 
-                // Ferma registrazione
                 if (mediaRecorder.state !== 'inactive') {
                     mediaRecorder.stop();
                 }
                 
-                // Ferma stream
                 if (currentStream) {
                     currentStream.getTracks().forEach(track => track.stop());
                     currentStream = null;
                 }
                 
-                document.getElementById('recBtn').textContent = '● REC';
+                document.getElementById('recBtn').textContent = '● Rec';
                 document.getElementById('recBtn').classList.remove('recording');
             }
         }
@@ -509,7 +677,9 @@
                 const result = await response.json();
                 loadingMsg.remove();
 
-                const timestamp = new Date().toLocaleTimeString('it-IT');
+                const elapsedTime = recordingStartTime ? Date.now() - recordingStartTime : 0;
+                const timestamp = formatElapsedTime(elapsedTime);
+                
                 const transcriptItem = {
                     timestamp: timestamp,
                     text: result.text
@@ -521,14 +691,12 @@
             } catch (error) {
                 loadingMsg.remove();
                 
-                // Mostra errore dettagliato
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'error';
                 
                 let errorMessage = 'Errore nella trascrizione:\n';
                 errorMessage += error.message + '\n';
                 
-                // Se c'è una risposta dall'API, mostrala
                 if (error.response) {
                     errorMessage += 'Dettagli: ' + JSON.stringify(error.response);
                 }
@@ -542,7 +710,6 @@
         function displayTranscript(item) {
             const transcriptArea = document.getElementById('transcriptArea');
             
-            // Rimuovi messaggio iniziale se presente
             if (transcriptArea.querySelector('p[style*="color: #999"]')) {
                 transcriptArea.innerHTML = '';
             }
@@ -557,7 +724,8 @@
         function clearTranscript() {
             if (confirm('Sei sicuro di voler cancellare tutta la trascrizione?')) {
                 transcriptData = [];
-                document.getElementById('transcriptArea').innerHTML = '<p style="color: #999; text-align: center;">Premi REC per iniziare la registrazione...</p>';
+                recordingStartTime = null;
+                document.getElementById('transcriptArea').innerHTML = '<p style="color: #999; text-align: center;">Premi Rec per iniziare la registrazione...</p>';
             }
         }
 
@@ -587,6 +755,10 @@
             document.getElementById('chatInput').value = text;
         }
 
+        function insertPrompt() {
+            document.getElementById('chatInput').value = defaultPrompt;
+        }
+
         async function sendMessage() {
             const input = document.getElementById('chatInput');
             const message = input.value.trim();
@@ -603,12 +775,10 @@
 
             const chatArea = document.getElementById('chatArea');
             
-            // Rimuovi messaggio iniziale se presente
             if (chatArea.querySelector('p[style*="color: #999"]')) {
                 chatArea.innerHTML = '';
             }
 
-            // Mostra messaggio utente
             const userMsg = document.createElement('div');
             userMsg.className = 'message user';
             userMsg.textContent = message;
@@ -617,7 +787,6 @@
             input.value = '';
             chatHistory.push({ role: 'user', content: message });
 
-            // Mostra loading
             const loadingMsg = document.createElement('div');
             loadingMsg.className = 'loading';
             loadingMsg.textContent = 'ChatGPT sta scrivendo...';
@@ -680,7 +849,6 @@
             }
         }
 
-        // Permetti invio con Enter (Shift+Enter per andare a capo)
         document.getElementById('chatInput').addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
