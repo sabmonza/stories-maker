@@ -387,16 +387,16 @@
                 mediaRecorder = new MediaRecorder(stream);
                 audioChunks = [];
 
-                mediaRecorder.ondataavailable = (event) => {
-                    audioChunks.push(event.data);
+                mediaRecorder.ondataavailable = async (event) => {
+                    if (event.data.size > 0) {
+                        // Ogni 5 secondi arriva un chunk, lo trascriviamo subito
+                        const audioBlob = new Blob([event.data], { type: 'audio/webm' });
+                        await transcribeAudio(audioBlob);
+                    }
                 };
 
-                mediaRecorder.onstop = async () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                    await transcribeAudio(audioBlob);
-                };
-
-                mediaRecorder.start();
+                // Emetti un chunk ogni 5 secondi (5000ms)
+                mediaRecorder.start(5000);
                 isRecording = true;
                 
                 document.getElementById('recBtn').textContent = '⏸ PAUSA';
