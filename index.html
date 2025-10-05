@@ -389,14 +389,19 @@
 
                 mediaRecorder.ondataavailable = async (event) => {
                     if (event.data.size > 0) {
-                        // Ogni 5 secondi arriva un chunk, lo trascriviamo subito
+                        // Controlla dimensione minima (100KB circa = 100000 bytes)
+                        if (event.data.size < 50000) {
+                            console.log('Chunk troppo piccolo, ignorato:', event.data.size, 'bytes');
+                            return;
+                        }
+                        // Ogni 10 secondi arriva un chunk, lo trascriviamo subito
                         const audioBlob = new Blob([event.data], { type: 'audio/webm' });
                         await transcribeAudio(audioBlob);
                     }
                 };
 
-                // Emetti un chunk ogni 5 secondi (5000ms)
-                mediaRecorder.start(5000);
+                // Emetti un chunk ogni 10 secondi (10000ms) per avere file più grandi
+                mediaRecorder.start(10000);
                 isRecording = true;
                 
                 document.getElementById('recBtn').textContent = '⏸ PAUSA';
