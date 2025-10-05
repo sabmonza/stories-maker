@@ -254,6 +254,11 @@
         <input type="password" id="apiKey" placeholder="Inserisci la tua OpenAI API Key">
         <button onclick="saveApiKey()">Salva API Key</button>
         <span id="apiStatus" class="status disconnected">Non configurato</span>
+        <br><br>
+        <label for="audioSource">Seleziona microfono: </label>
+        <select id="audioSource" style="padding: 8px; border-radius: 4px; border: 2px solid #E7E0EC;">
+            <option value="">Caricamento microfoni...</option>
+        </select>
     </div>
 
     <div class="container">
@@ -301,6 +306,44 @@
             document.getElementById('apiStatus').className = 'status connected';
         }
 
+        // Carica lista microfoni disponibili
+        async function loadAudioDevices() {
+            try {
+                // Richiedi permesso microfono prima
+                await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const audioInputs = devices.filter(device => device.kind === 'audioinput');
+                
+                const select = document.getElementById('audioSource');
+                select.innerHTML = '';
+                
+                audioInputs.forEach((device, index) => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.text = device.label || `Microfono ${index + 1}`;
+                    select.appendChild(option);
+                });
+                
+                // Salva il dispositivo selezionato
+                select.onchange = () => {
+                    localStorage.setItem('selected_audio_device', select.value);
+                };
+                
+                // Ripristina selezione salvata
+                const savedDevice = localStorage.getItem('selected_audio_device');
+                if (savedDevice) {
+                    select.value = savedDevice;
+                }
+            } catch (error) {
+                console.error('Errore nel caricamento dei dispositivi audio:', error);
+                document.getElementById('audioSource').innerHTML = '<option>Errore: permetti l\'accesso al microfono</option>';
+            }
+        }
+
+        // Carica dispositivi all'avvio
+        window.addEventListener('load', loadAudioDevices);
+
         function saveApiKey() {
             apiKey = document.getElementById('apiKey').value.trim();
             if (apiKey) {
@@ -328,14 +371,18 @@
 
         async function startRecording() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ 
+                const audioSource = document.getElementById('audioSource').value;
+                const constraints = {
                     audio: {
+                        deviceId: audioSource ? { exact: audioSource } : undefined,
                         sampleRate: 16000,
                         channelCount: 1,
                         echoCancellation: true,
                         noiseSuppression: true
-                    } 
-                });
+                    }
+                };
+                
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
 
                 mediaRecorder = new MediaRecorder(stream);
                 audioChunks = [];
