@@ -376,11 +376,12 @@
                     </div>
                     <div>
                         <h2>Assistente ChatGPT</h2>
-                        <div class="sub" id="chatModelSub">gpt-4o-mini</div>
+                        <div class="sub" id="chatModelSub">gpt-5.4-mini</div>
                     </div>
                     <select id="chatModel" class="input" style="margin-left:auto;min-width:auto;padding:7px 10px;font-size:12.5px;" onchange="document.getElementById('chatModelSub').textContent=this.value">
-                        <option value="gpt-4o-mini">gpt-4o-mini</option>
-                        <option value="gpt-4o">gpt-4o</option>
+                        <option value="gpt-5.4-mini">GPT-5.4 mini · veloce</option>
+                        <option value="gpt-5.2-chat-latest">GPT-5.2 · instant</option>
+                        <option value="gpt-5.5">GPT-5.5 · max qualità</option>
                     </select>
                 </div>
 
@@ -851,18 +852,24 @@ ESEMPIO DI RICHIESTA
         chat.scrollTop = chat.scrollHeight;
 
         try {
+            const chatModelName = document.getElementById('chatModel').value;
+            // I modelli di ragionamento GPT-5 (es. gpt-5.5, gpt-5.4-mini) usano
+            // max_completion_tokens e non accettano una temperature personalizzata.
+            // I modelli "instant"/chat-latest si comportano come i vecchi chat model.
+            const isInstant = /chat-latest|chat$/.test(chatModelName);
+            const reqBody = {
+                model: chatModelName,
+                messages: [
+                    { role: 'system', content: 'Sei un assistente che aiuta a elaborare trascrizioni vocali in italiano. Puoi correggere errori, estrarre punti chiave, riformulare il testo e aiutare a creare contenuti per Instagram Stories.' },
+                    ...chatHistory
+                ],
+                max_completion_tokens: 2000
+            };
+            if (isInstant) reqBody.temperature = 0.7;
             const res = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-                body: JSON.stringify({
-                    model: document.getElementById('chatModel').value,
-                    messages: [
-                        { role: 'system', content: 'Sei un assistente che aiuta a elaborare trascrizioni vocali in italiano. Puoi correggere errori, estrarre punti chiave, riformulare il testo e aiutare a creare contenuti per Instagram Stories.' },
-                        ...chatHistory
-                    ],
-                    max_tokens: 2000,
-                    temperature: 0.7
-                })
+                body: JSON.stringify(reqBody)
             });
             typing.remove();
             if (!res.ok) {
